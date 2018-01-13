@@ -88,7 +88,38 @@ Read the `TimesSquareSignage.csv` and import it into R as `ts_data`. Then check 
 4. Which rows (people) have missing values? Which columns (variables) include missing values?
 
 ```{r Question 4}
-ts_data = read.csv('https://s3.amazonaws.com/graderdata/TimesSquareSignage.csv', stringsAsFactors=FALSE)
+ts_data = read.csv('https://s3.amazonaws.com/graderdata/TimesSquareSignage.csv', stringsAsFactors=FALSE) #reading file in
+print(head(ts_data)) 
+cat(dim(ts_data)[1], 'rows  : ', dim(ts_data)[2], 'fields \n \n') #1. num obervations and variables
+c = 1:18
+#print(sapply(ts_data, class)) # 2. getting class of each field
+column_na = sapply(c, na_count <- function(x) {# 3.getting na in each column
+  sum(is.na(ts_data[,x]))
+})
+row_na = sapply(1:dim(ts_data)[1], na_count <- function(x){# 4. row_na, replaced list input
+  sum(is.na(ts_data[x,]))
+})
+
+cat('na count in each vector =', column_na, '\n', '\n') #counting number of na values in each vector
+#cat('na in each row =', row_na, '\n', '\n') # counting number of na values in each row
+total_na = sum(column_na)
+cat('total na in df =', total_na, '\n \n')
+
+# adapting func to give bool if there are na over cols
+is_na_col = sapply(1:dim(ts_data)[2], has_na <- function(x){
+       any(is.na(ts_data[,x])) 
+}
+)
+# generating bool vector for rows 
+is_na_row = sapply(1:dim(ts_data)[1], has_na <- function(x){
+       any(is.na(ts_data[x,])) 
+}
+)
+# boolean filtering to give cols with na
+
+cat('following colums contain missing data: \n', colnames(ts_data[is_na_col])) #returning col names of vectors with missing data
+print(head(ts_data[is_na_row,])) #returns rows with na data
+
 ```
 
 ## Question #5:
@@ -102,6 +133,20 @@ From the Time Square dataset, we'd like to extract specific information about ad
 3. The name, address, and location of the ten signs with the largest total square footage. Save as `TopTen.csv`. 
 
 ```{r Question 5}
+
+#dir.creat('data') 
+B_way = subset(ts_data, grepl("Broadway", ts_data$'Building.Address')) #grepl to obtain addresses w/ bway
+print(head(B_way))
+write.csv(B_way, 'data/UpperBway.csv') #run only once for HW
+avg_SF = mean(as.numeric(ts_data[,'TOTAL.SF']), na.rm = TRUE) #only with avail. data
+print(avg_SF)
+SF = ts_data[ts_data['TOTAL.SF'] > 2104.7,] #watch out for the LAST comma in slicing
+# this selects rows which contain "total.sf" greater than value,COMMA, all columns
+write.csv(SF, 'data/SF.csv')
+sf_order = order(-ts_data['TOTAL.SF']) # I could probably do this in one line
+ts_bysize = ts_data[sf_order,]
+TopTen = ts_bysize[1:10,c(1,2,3)]
+write.csv(TopTen, 'data/TopTen.csv')
 
 ```
 
