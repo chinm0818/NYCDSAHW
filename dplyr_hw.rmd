@@ -104,8 +104,8 @@ q31d = mutate(q31d, SalRangeFrom = Salary.Range.From * 5*4*12, SalRangeTo = Sala
 q31a = mutate(q31a, SalRangeFrom = Salary.Range.From, SalRangeTo = Salary.Range.To)
 
 head(q31h)
-head(q31d)
-head(q31a)
+#head(q31d)
+#head(q31a)
 
 #combine back together
 
@@ -115,11 +115,19 @@ dim(q31t) # apparently we lost a serveral data points in the conversion and merg
 
 q31ans = q31t %>%
   group_by(., Agency) %>% 
-  summarise(., mean(SalRangeFrom), median(SalRangeFrom), mean(SalRangeTo), median(SalRangeTo)) %>%
+  summarise(., meanSalfrom = mean(SalRangeFrom), medianSalfrom = median(SalRangeFrom), meanSalto = mean(SalRangeTo), medianSalto = median(SalRangeTo))
  
 
 head(q31ans)
 
+
+
+#2. Each job(agency) is given a salary range (`Salary.Range.From` and `Salary.Range.To`). Which company(agency) has the highest average lower end salary (`Salary.Range.From`)?
+
+q32 = q31t %>%
+  group_by(., Agency, Civil.Service.Title)
+  
+head(q32)
 
 ```
 
