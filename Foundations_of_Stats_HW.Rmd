@@ -26,9 +26,20 @@ The `Temp.txt` dataset records the body temperatures, gender, and heart rate of 
   + What is a 95% confidence interval for the ratio between female and male heart rate variances?
   + Interpret your results in context of the problem.
 
-```{r, include=FALSE}
+```{r echo=TRUE, warning=TRUE}
 temp = read.table('https://s3.amazonaws.com/graderdata/Temp.txt', header = TRUE)
 
+print(summary(temp))
+print(sd(temp$Body.Temp))
+print(sd(temp$Heart.Rate))
+print(var(temp$Body.Temp))
+print(var(temp$Heart.Rate))
+print(cor(temp$Body.Temp, temp$Heart.Rate))
+print(cor.test(temp$Body.Temp, temp$Heart.Rate))
+
+plot(density(temp$Body.Temp))
+plot(density(temp$Heart.Rate))
+plot(temp$Heart.Rate, temp$Body.Temp)
 ```
 
 ##Question #2: Plant Growth
