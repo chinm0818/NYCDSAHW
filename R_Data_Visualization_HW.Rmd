@@ -78,6 +78,8 @@ Load the New York Knicks dataset, `Knicks.rda`. You will see a dataframe called 
 ```{r NBA}
 
 library(tidyr)
+library(ggplot2)
+library(dplyr)
 load(url('https://s3.amazonaws.com/graderdata/Knicks.rda'))
 
 wl = data %>%
@@ -88,7 +90,7 @@ wl = data %>%
 
 head(wl)
 
-q31 = ggplot(data = wl, aes(x = season, y = ratio)) + geom_col()
+q31 = ggplot(data = wl, aes(x = season, y = ratio)) + geom_bar(stat = 'identity')
 q31
 
 #2
@@ -108,7 +110,7 @@ wla = data %>%
 wl2 = rbind(wla, wlh) %>%
   mutate(., ratio = W/L)
 
-q32 = ggplot(data = wl2, aes(x = season, y= ratio)) + geom_col(aes(fill =  visiting), position = 'dodge')
+q32 = ggplot(data = wl2, aes(x = season, y= ratio)) + geom_bar(stat = 'identity', aes(fill =  visiting), position = 'dodge')
 
 print(q32)
 
@@ -145,6 +147,83 @@ Download the names.zip file from [here](https://s3.amazonaws.com/graderdata/name
 
 
 ```{r babyNames}
+
+library(stringr)
+library(regexr)
+library(ggplot2)
+
+names = read.table('yob2014.txt', sep = ",", col.names = c('name','sex', 'cnt'))
+
+g_names = names %>%
+  dplyr::filter(., str_detect(name, "^G")) %>%
+  unique(.)
+
+print(dim(g_names)[1])
+
+#2
+
+k_names = names %>%
+  dplyr::filter(., str_detect(name, "^K")) %>%
+  dplyr::summarize(., sum(cnt))
+
+print(k_names)
+
+# 3
+
+MF_names = names %>%
+  dplyr::filter(., duplicated(name) == TRUE) %>%
+  dplyr::select(., name)
+
+#4
+
+grouped_names = names %>%
+  dplyr::group_by(., name) %>%
+  dplyr::summarise(., cnt = sum(cnt))
+
+name_range = grouped_names %>%
+  dplyr::filter(., between(cnt, 5000, 6000))
+
+#
+
+
+                   
+alpha_filter = function(x){
+  alpha = (str_split('A B C D E F G H I J K L M N O P Q R S T U V W X Y Z', ' '))[[1]]
+  alpha = paste0('^', alpha)
+  lst = grouped_names %>%
+    dplyr::filter(., str_detect(name, alpha[x]))%>%
+    dplyr::summarise(., name_cnt = sum(cnt))
+  return(lst$name_cnt)
+}                
+
+AZ_names = data.frame(sapply(1:26, alpha_filter), row.names = alpha)
+colnames(AZ_names) = 'lettercnt'
+AZ_names$index = row.names(AZ_names)
+
+ggplot(AZ_names, aes(x = index, y = lettercnt)) + geom_bar(stat = "identity")
+
+#challenge 
+
+#making function to combine files. everything else is pretty easy after that
+
+
+files = paste0('yob', paste0(1880:2014, '.txt'))
+
+#yob1880 = read.csv(files[1], sep = ",", col.names = c('name','sex', 'cnt'))
+
+file_condense = function(year1, year2){
+  years = c(year1:year2)
+  files = paste0('yob', paste0(years, '.txt'))
+  combine = c()
+  for(y in 1:length(years)){
+    temp = read.csv(files[y], header = FALSE)
+    temp[,4] = years[y]
+    combine = rbind(combine, temp)
+  }
+  colnames(combine) = c('name','sex','cnt','year')
+  return(combine)
+}
+
 
 ```
 
