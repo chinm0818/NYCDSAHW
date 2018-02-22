@@ -1,0 +1,74 @@
+---
+title: "Regularization HW"
+author: "MChin"
+date: "February 21, 2018"
+output: html_document
+---
+1. Load: Load in the [06]Prostate.txt dataset into your workspace. This dataset
+comes from a study by Stamey et a. (1989) of prostate cancer, measuring the correlation
+between the level of a prostate-speci c antigen and some covariates. The included
+variables are the log-cancer volume, log-prostate weight, age of patient, log-amount of
+benign hyperplasia, seminal vesicle invasion, log-capsular penetration, Gleason score,
+and percent of Gleason scores 4 or 5; the response variable is the log-psa.
+
+
+```{r}
+df = read.csv('[06] Prostate.txt', sep = " ")
+head(df)
+```
+
+2. Train test split: Create an 80% - 20% train-test split with your data. Please use
+set.seed(0) so the results will be reproducible.
+
+
+
+```{r cars}
+dim(df)
+set.seed(1234)
+testset = sample(1:dim(df)[1], 0.2*dim(df)[1])
+length(testset)
+```
+
+3. Fit a model: Use library glmnet to fit a ridge regression model on your training data
+by setting up a grid of lambda values 10^seq(5, -2, length = 100) . Save the
+coefficients of these models in an object.
+
+```{r}
+library(glmnet)
+dfTrain= df[-testset,]
+x = model.matrix(lcavol ~ ., dfTrain)[, -1] #Dropping the intercept column.
+y = dfTrain$lcavol
+
+grid = 10^seq(5, -2, length = 100)
+
+ridge.models = glmnet(x, y, family = 'gaussian', alpha = 0, lambda = grid)
+
+dim(coef(ridge.models)) 
+coef(ridge.models) #
+```
+
+
+4. Visualization: Plot the coefficients of these models and comment on the shrinkage.
+
+
+```{r}
+ridge.models$lambda[80] #Lambda = 0.2595.
+coef(ridge.models)[, 80] #Estimates not close to 0.
+sqrt(sum(coef(ridge.models)[-1, 80]^2)) #L2 norm is 136.8179.
+print("  ")
+print("  ")
+
+#What do the estimates look like for a larger value of lambda?
+ridge.models$lambda[15] #Lambda = 10,235.31.
+coef(ridge.models)[, 15] #Most estimates close to 0.
+sqrt(sum(coef(ridge.models)[-1, 15]^2)) #L2 norm is 7.07.
+
+plot(ridge.models, xvar = "lambda", label = TRUE, main = "Ridge Regression")
+
+```
+
+```{r}
+
+
+
+```
